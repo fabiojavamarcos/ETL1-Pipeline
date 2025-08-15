@@ -1,34 +1,60 @@
 # ETL1-Pipeline
 
-The ETL1 pipeline reads the commit data and process it to populate the database with information about the source code updated by PRs
+The ETL1 pipeline data will be used to populate the database(apriori) with information about APIs/libaries(from API_specific) from the source code updated by PRs, i.e. $${\color{orange}linking\ skills\ to\ authors\ based\ on\ the\ libaries\ used\ in\ files\ updated\ in\ PRs\ that\ they\ created.}$$
 
-The first inout is the commit file created by the extractor. Below is an example of the format required. Not all columns are needed. However, to future expansions (like the predictions of the Author skills) new column data should be included into the processing pipeline.
+&nbsp;
+## Program
 
-The merged-commit-commits (3).csv (58MB) file can be downloaded at:
+ETL1 receives data, called master_all.csv, and parses it to create filesPR3BodyTitle2 which goes into [OSSPRMapper4](https://github.com/fabiojavamarcos/OSSPRMapper4). 
 
-https://drive.google.com/file/d/133Va716hRhQtLHlS_BojcnzDAG-UAGBa/view?usp=sharing
+The output will only pass through pull requests. The output will contain: 
+- issue number for the pull request
+- files changed in the pull request
+- title of the pull request
+- body of the pull request
+- author username for the author that created the pull request
 
+&nbsp;
+
+The dataframe is setup have a ';' in the cells between elements. Files are added in a cell together, in one string, and separated by ';'. For java, only files with extension ".java" are kept (file extension can be updated). 
+
+The CSV separator is set to '\t' currently and the TXT(used in OSSPRMapper) is set to ' '. The separators can be confusing at first glance, but since we are using raw text, it is important to have a very unique separator. It is also important to be able to chunk all the files together and be able to split them easily too.
+
+<details>
+<summary>filesPR3BodyTitle2.csv Example:</summary>
+    <img width="959" height="286" alt="CSV Example" src="https://github.com/user-attachments/assets/17599ab0-a284-471c-9686-5ed3f5d941f8" />
+</details>
+
+<details>
+    <summary>filesPR3BodyTitle2.txt Example:</summary>
+    <img width="943" height="419" alt="TXT Example" src="https://github.com/user-attachments/assets/6bf493f6-930f-4c4a-adce-f107571cccb7" />
+</details>
+
+As of now, the only file necesary for all projects should be updated_research2. The only thing that should be changed is column names or column setup if future input data is different.
+
+
+&nbsp;
+## Files Names
 The file to be read whould be updated in the second cell as the example below:
-inputToRead = "/home/j/git/ETL1-Pipeline/data/inputs/new/rxjava_full/rxjava_full_commit_output.csv"
 
-Research2.ipynb is on charge of splitting the file names commited by PRs into their own columns for further processing and populate the PR table. Files  not related to source code are deleted. For this reason, the cell responsible for the deletion should be updated with the pertinent source code file extension. Example: for Java files the cell should persist only files with extension ".java". It persists the pr (number of the PR) title, and body.
-
-The version to process author's skills persists the pr (number of the PR) title, body and author and it is called Research4. We suggest to create one notebook for each project.
+    inputToRead = "./ETL1-Pipeline/data/inputs/new/master_all_projectName.csv"
 
 The notebook writes three outputs:
-fileNameOutput = "/home/j/git/ETL1-Pipeline/data/outputs/new/rxjava/dataframe_file_names.csv"
 
-filesPR3_TXT_Output = r"/home/j/git/ETL1-Pipeline/data/outputs/new/rxjava/filesPR3BodyTitle2.txt"
+    fileNameOutput = "./ETL1-Pipeline/data/outputs/new/rxjava/dataframe_file_names.csv"
 
-filesPR3_CSV_Output = "/home/j/git/ETL1-Pipeline/data/outputs/new/rxjava/filesPR3BodyTitle2.csv"
+    filesPR3_TXT_Output = "./ETL1-Pipeline/data/outputs/new/filesPR3BodyTitle2.txt"
 
-The filesPR3_TXT_Output is used in the next step.
+    filesPR3_CSV_Output = "./ETL1-Pipeline/data/outputs/new/filesPR3BodyTitle2.csv"
 
-The figure file OSL_pipeline-inputs.png shows the entire pipeline (ETL1 and ETL2). Observe the input for the Research2.ipynb in the figure is another file produced by the Classifier.R. This step is not necessary anymore. Next version of the picture will remove it.
+The filesPR3BodyTitle2.txt is used in the next step: OSSPRMapper4.
 
-![OSL_pipeline-inputs](https://user-images.githubusercontent.com/34105280/212744629-529b7dc9-6a4e-4869-a7e5-2c2b51affdc8.png)
 
-NOTE June 4, 2025:
-    Currently, closed commit data can go dirrectly through updated_Research2.ipynb to get the output.
-    New data (files from mining project, starting with master_all) required column names to be changed, but the values should be equivalent.
-    Columns extracted: issue_number, author_name, files, patch_text, body, title.
+&nbsp;
+## Diagram
+Below is a diagram of the entire pipeline, up to date with all the information I believe should be necesary to understand at a glance. Please look back at past data or program outputs for specific understanding of how the data is handled.
+
+<details>
+<summary> Pipeline Diagram </summary>
+    <img width="3553" height="1753" alt="DataPipeline-v1 1 drawio" src="https://github.com/user-attachments/assets/638083bd-73ae-4389-905e-f62ac0efbca3" /> 
+</details>
